@@ -5,6 +5,8 @@
 #include <WiFiManager.h> //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 #include <WiFiUdp.h>
 
+#include <DS1307RTC.h>
+ 
 #include <TimeLib.h>
 #include <Timezone.h>
 
@@ -17,6 +19,8 @@ TimeChangeRule BST = {"BST", Last, Sun, Mar, 1, 60};        //British Summer Tim
 TimeChangeRule GMT = {"GMT", Last, Sun, Oct, 2, 0};         //Standard Time
 Timezone localTimeZone(BST, GMT);
 
+
+const int JANUARY_FIRST_2000 = 946684800;
 
 unsigned int localPort = 2390;      // local port to listen for UDP packets
 const int UDP_TIMEOUT = 2000;    // timeout in miliseconds to wait for an UDP packet to arrive
@@ -147,13 +151,30 @@ void showNTPTime() {
 
   sendNTPpacket(timeServerIP); // send an NTP packet to a time server
   unsigned long epoch = receiveNTPTime(UDP_TIMEOUT);
-  printTime(epoch);
-  displayTimeOnLedRing(epoch);
+
+  Serial.print("  Raw NTP time = "); 
+  Serial.println(epoch);
+
+  RTC.set(epoch);
+
+  time_t rtcTime = RTC.get();
+
+  Serial.print("RTC Epoch time = ");
+  Serial.println(rtcTime);
+  
+  printTime(rtcTime);
+  displayTimeOnLedRing(rtcTime);
 }
+//
+//  Raw NTP time = 1493235541
+//RTC Epoch time = 1671896785
+//     Unix time = 1671896785
+
 
 void printTime(time_t epoch) {
   if(epoch != -1) {
     // print Unix time:
+    Serial.print("     Unix time = ");
     Serial.println(epoch);
   
     time_t ukTime = localTimeZone.toLocal(epoch);
@@ -263,7 +284,6 @@ unsigned long receiveNTPTime(int timeout) {
     Serial.println(secsSince1900);
 
     // now convert NTP time into everyday time:
-    Serial.print("Unix time = ");
     // Unix time starts on Jan 1 1970. In seconds, that's 2208988800:
     const unsigned long seventyYears = 2208988800UL;
     // subtract seventy years:
