@@ -47,13 +47,14 @@ void setup() {
   networkManager.configureAndConnectToWifi();
   networkManager.setupNTP();
 
+  networkManager.setupOTAUpdateServer();
   networkManager.setupWebServer();
   networkManager.setupMDNS();
 }
 
 void loop()
 {
-  networkManager.runWebServer();
+  networkManager.handleServerClients();
   
   showNTPTime();
 

@@ -6,6 +6,8 @@
 #include <WiFiManager.h> //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 #include <ESP8266mDNS.h>
 #include <ESP8266WebServer.h> //Local WebServer used to serve the configuration portal
+#include <ESP8266HTTPUpdateServer.h>
+#include <ArduinoOTA.h>
 #include "WebHandlers.h"
 
 const int NTP_PACKET_SIZE = 48; // NTP time stamp is in the first 48 bytes of the message
@@ -25,6 +27,7 @@ class NetworkManager {
     WiFiUDP udp;
 
     ESP8266WebServer webServer;
+//    ESP8266HTTPUpdateServer httpUpdater;
     WebHandlers webHandlers;
     int reqCount = 0;                // number of requests received
     
@@ -35,8 +38,9 @@ class NetworkManager {
       
     }
 
+    void setupOTAUpdateServer();
     void setupWebServer();
-    void runWebServer();
+    void handleServerClients();
 
     void setupMDNS();
     

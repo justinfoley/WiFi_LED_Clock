@@ -1,5 +1,9 @@
 #include "NetworkManager.h"
 
+//const char* update_path = "/firmware";
+//const char* update_username = "admin";
+//const char* update_password = "admin";
+
 void configModeCallback (WiFiManager *myWiFiManager) {
   Serial.println("Entered config mode");
   Serial.println(WiFi.softAPIP());
@@ -59,13 +63,49 @@ void NetworkManager::setupMDNS() {
 
 void NetworkManager::setupWebServer() {
   webHandlers.setupHandlers();
+//  httpUpdater.setup(&webServer, update_path, update_username, update_password);
   webServer.begin();
   Serial.println("HTTP server started");
 }
 
+void NetworkManager::setupOTAUpdateServer() {
+  Serial.println("Setting up OTA");
+  
+  // Port defaults to 8266
+  ArduinoOTA.setPort(8266);
 
-void NetworkManager::runWebServer() {
+  // Hostname defaults to esp8266-[ChipID]
+  // ArduinoOTA.setHostname("myesp8266");
+
+  // No authentication by default
+//  ArduinoOTA.setPassword((const char *)"123");
+
+  ArduinoOTA.onStart([]() {
+    Serial.println("OTA Start");
+  });
+  ArduinoOTA.onEnd([]() {
+    Serial.println("\nOTA End");
+    ESP.reset();
+    delay(1000);
+  });
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    Serial.printf("OTA Progress: %u%%\r", (progress / (total / 100)));
+  });
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.printf("OTA Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR) Serial.println("OTA Auth Failed");
+    else if (error == OTA_BEGIN_ERROR) Serial.println("OTA Begin Failed");
+    else if (error == OTA_CONNECT_ERROR) Serial.println("OTA Connect Failed");
+    else if (error == OTA_RECEIVE_ERROR) Serial.println("OTA Receive Failed");
+    else if (error == OTA_END_ERROR) Serial.println("OTA End Failed");
+  });
+  ArduinoOTA.begin();
+  Serial.println("OTA Ready");
+}
+
+void NetworkManager::handleServerClients() {
   webServer.handleClient();
+  ArduinoOTA.handle();
 }
 
 void NetworkManager::setupNTP() {
