@@ -50,19 +50,84 @@ void setup() {
   networkManager.setupOTAUpdateServer();
   networkManager.setupWebServer();
   networkManager.setupMDNS();
+  
+  RTC.get();
+  if(RTC.chipPresent()) 
+    Serial.println("Have RTC present");
+  else
+    Serial.println("No RTC.");  
+
+  //Set to a starting time epoch to test sync
+//  RTC.set(1489869357); //1489276800
+
+  time_t rtcTime = RTC.get();
+  Serial.print("rtcTime - ");
+  Serial.println(rtcTime);
+
+  if(timeStatus()!= timeSet) 
+    Serial.println("TimeLib not synced yet");
+  else
+    Serial.println("TimeLib synced");  
+
+  setSyncInterval(30);
+  setSyncProvider(timeSync);   // the function to get the time from the RTC
+}
+
+time_t timeSync() // called periodically by Time library to syncronise itself
+{   
+  time_t rtcTime = RTC.get();
+  Serial.print("rtcTime - ");
+  Serial.println(rtcTime);
+  Serial.println("RTC is setting the system time"); 
+  return rtcTime;
 }
 
 void loop()
 {
   networkManager.handleServerClients();
+
+  EVERY_N_MILLISECONDS( 120000 ) {
+    unsigned long epochGMT = networkManager.getNTPTime();
+
+    if(epochGMT != -1) {
+      RTC.set(epochGMT);
+      Serial.println("NTP is setting the system time");
+      printTime(epochGMT);
+    }
+    
+  }
+
+//  time_t rtcTime = RTC.get();
+//
+//  Serial.print("RTC Epoch time = ");
+//  Serial.println(rtcTime);
+//  
+//  printTime(rtcTime);
+//  displayTimeOnLedRing(rtcTime);
+
+  EVERY_N_MILLISECONDS( 500 ) {
+    time_t utc = now();
+    time_t ukTime = localTimeZone.toLocal(utc);
   
-  showNTPTime();
+    // Generate a pattern
+  //  rainbowWithGlitter();
+  
+    displayTimeOnLedRing(ukTime);
+  //  addGlitter(10);
+    
+    // send the 'leds' array out to the actual LED strip
+    FastLED.show();
+    // insert a delay to keep the framerate modest
+//    FastLED.delay(1000/FRAMES_PER_SECOND); 
+  }
+  
+//  showNTPTime();
 
 //  displayTimeOnLedRing(epoch);
 //  addGlitter(10);
   
   // send the 'leds' array out to the actual LED strip
-  FastLED.show();
+//  FastLED.show();
   // insert a delay to keep the framerate modest
 //  FastLED.delay(1000/FRAMES_PER_SECOND); 
   
@@ -70,22 +135,22 @@ void loop()
 //  delay(10000);
 }
 
-void showNTPTime() {
-  unsigned long epoch = networkManager.getNTPTime();
-
-  Serial.print("  Raw NTP time = "); 
-  Serial.println(epoch);
-
-  RTC.set(epoch);
-
-  time_t rtcTime = RTC.get();
-
-  Serial.print("RTC Epoch time = ");
-  Serial.println(rtcTime);
-  
-  printTime(rtcTime);
-  displayTimeOnLedRing(rtcTime);
-}
+//void showNTPTime() {
+//  unsigned long epochGMT = networkManager.getNTPTime();
+//
+//  Serial.print("  Raw NTP time = "); 
+//  Serial.println(epochGMT);
+//
+//  RTC.set(epochGMT);
+//
+//  time_t rtcTime = RTC.get();
+//
+//  Serial.print("RTC Epoch time = ");
+//  Serial.println(rtcTime);
+//  
+//  printTime(rtcTime);
+//  displayTimeOnLedRing(rtcTime);
+//}
 
 void printTime(time_t epoch) {
   if(epoch != -1) {
