@@ -5,6 +5,7 @@
 #include <TimeLib.h>
 #include <Timezone.h>
 
+#define FASTLED_ALLOW_INTERRUPTS 0
 #include "FastLED.h"
 
 FASTLED_USING_NAMESPACE
@@ -18,15 +19,19 @@ Timezone localTimeZone(BST, GMT);
 //#define CLK_PIN   4
 #define LED_TYPE    WS2811
 #define COLOR_ORDER GRB
-#define NUM_LEDS    16
+//#define NUM_LEDS    16
+#define NUM_LEDS    60
 
 //CRGB leds[NUM_LEDS];
 CRGBArray<NUM_LEDS> leds;
 
 CRGBPalette16 currentPalette;
 
-#define BRIGHTNESS          50
+#define BRIGHTNESS          30
 #define FRAMES_PER_SECOND  120
+
+#define NTP_RESYNC_FREQUENCY 300000
+#define RTC_RESYNC_FREQUENCY 30
 
 NetworkManager networkManager;
 
@@ -51,25 +56,32 @@ void setup() {
   networkManager.setupWebServer();
   networkManager.setupMDNS();
   
-  RTC.get();
-  if(RTC.chipPresent()) 
-    Serial.println("Have RTC present");
-  else
-    Serial.println("No RTC.");  
-
-  //Set to a starting time epoch to test sync
-//  RTC.set(1489869357); //1489276800
-
-  time_t rtcTime = RTC.get();
-  Serial.print("rtcTime - ");
-  Serial.println(rtcTime);
+  time_t rtcTime = RTC.get(); 
+  if (rtcTime) {
+    Serial.print("RTC already set rtcTime - ");
+    Serial.println(rtcTime);
+  } else {
+    if(RTC.chipPresent()) {
+      Serial.println("Have RTC present but unset");
+      unsigned long epochGMT = networkManager.getNTPTime();
+  
+      if(epochGMT != -1) {
+        RTC.set(epochGMT);
+        Serial.println("NTP is setting the system time");
+        printTime(epochGMT);
+      }
+    }
+    else {
+      Serial.println("No RTC.");
+    }
+  }
 
   if(timeStatus()!= timeSet) 
     Serial.println("TimeLib not synced yet");
   else
     Serial.println("TimeLib synced");  
 
-  setSyncInterval(30);
+  setSyncInterval(RTC_RESYNC_FREQUENCY);
   setSyncProvider(timeSync);   // the function to get the time from the RTC
 }
 
@@ -86,7 +98,7 @@ void loop()
 {
   networkManager.handleServerClients();
 
-  EVERY_N_MILLISECONDS( 120000 ) {
+  EVERY_N_MILLISECONDS( NTP_RESYNC_FREQUENCY ) {
     unsigned long epochGMT = networkManager.getNTPTime();
 
     if(epochGMT != -1) {
@@ -189,6 +201,34 @@ void setupGradientPalette()
 
 void displayTimeOnLedRing(time_t timeNow) 
 {
+  fill_solid(leds, NUM_LEDS, CRGB::Black);
+
+  int hour_led = map(mod8(hour(timeNow), 12), 0, 11, 0, NUM_LEDS - 1);
+  int minute_led = map(minute(timeNow), 0, 59, 0, NUM_LEDS - 1);
+  int second_led = map(second(timeNow), 0, 59, 0, NUM_LEDS - 1);
+
+  Serial.print(" ");
+  Serial.print(hour_led);
+  Serial.print(" ");
+  Serial.print(minute_led);
+  Serial.print(" ");
+  Serial.println(second_led);
+
+  for(int i = 0; i < NUM_LEDS; ++i) {
+    if(i <= second_led) {
+        leds[i] += CRGB::Blue;
+//        ColorFromPalette(currentPalette, i, 255, LINEARBLEND);
+    }
+  }
+
+  leds[hour_led] = CRGB::Green;
+  leds[minute_led] = CRGB::Red;
+  
+}
+
+/*
+void displayTimeOnLedRing(time_t timeNow) 
+{
   fill_solid(leds, 16, CRGB::Black);
 //  int second_led = 16 * (second() / 60);
 //
@@ -274,3 +314,13 @@ void displayTimeOnLedRing(time_t timeNow)
   // FastLED's built-in rainbow generator
 //  fill_rainbow( leds, NUM_LEDS, gHue, 7);
 }
+*/
+
+
+/*
+ * Colour modes pure colours - blue seconds, red minute, green hour
+ * 
+ * 
+ * 
+*/
+
