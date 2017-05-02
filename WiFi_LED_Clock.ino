@@ -25,7 +25,19 @@ Timezone localTimeZone(BST, GMT);
 //CRGB leds[NUM_LEDS];
 CRGBArray<NUM_LEDS> leds;
 
-CRGBPalette16 currentPalette;
+DEFINE_GRADIENT_PALETTE( heatmap_gp ) {
+  0,     0,  0,  0,   //black
+128,   255,  0,  0,   //red
+224,   255,255,  0,   //bright yellow
+255,   255,255,255 }; //full white
+
+DEFINE_GRADIENT_PALETTE( blue_green ) {
+  0,     0,   0, 255, // blue
+ 60,     0, 255, 0,    // green
+ 255,   255,255,255
+};
+
+CRGBPalette16 currentPalette = blue_green;
 
 #define BRIGHTNESS          30
 #define FRAMES_PER_SECOND  120
@@ -47,7 +59,7 @@ void setup() {
 
   FastLED.setMaxPowerInVoltsAndMilliamps(5, 3000);
 
-  setupGradientPalette();
+//  setupGradientPalette();
   
   networkManager.configureAndConnectToWifi();
   networkManager.setupNTP();
@@ -147,22 +159,6 @@ void loop()
 //  delay(10000);
 }
 
-//void showNTPTime() {
-//  unsigned long epochGMT = networkManager.getNTPTime();
-//
-//  Serial.print("  Raw NTP time = "); 
-//  Serial.println(epochGMT);
-//
-//  RTC.set(epochGMT);
-//
-//  time_t rtcTime = RTC.get();
-//
-//  Serial.print("RTC Epoch time = ");
-//  Serial.println(rtcTime);
-//  
-//  printTime(rtcTime);
-//  displayTimeOnLedRing(rtcTime);
-//}
 
 void printTime(time_t epoch) {
   if(epoch != -1) {
@@ -193,10 +189,13 @@ void printTime(time_t epoch) {
 
 void setupGradientPalette()
 {
-    // 'black out' all 16 palette entries...
-    fill_solid( currentPalette, 16, CRGB::Black);
+//    // 'black out' all 16 palette entries...
+//    fill_solid( currentPalette, 16, CRGB::Black);
+//    currentPalette[0] = CRGB::DarkBlue;
+//    currentPalette[1] = CRGB::Green;
+//    currentPalette[2] = CRGB::DarkBlue;
     currentPalette[0] = CRGB::DarkBlue;
-    currentPalette[1] = CRGB::Green;
+    currentPalette[255] = CRGB::Green;
 }
 
 void displayTimeOnLedRing(time_t timeNow) 
@@ -216,8 +215,7 @@ void displayTimeOnLedRing(time_t timeNow)
 
   for(int i = 0; i < NUM_LEDS; ++i) {
     if(i <= second_led) {
-        leds[i] += CRGB::Blue;
-//        ColorFromPalette(currentPalette, i, 255, LINEARBLEND);
+        leds[i] += ColorFromPalette(currentPalette, i, 255, LINEARBLEND);
     }
   }
 

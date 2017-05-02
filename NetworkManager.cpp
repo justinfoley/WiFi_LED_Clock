@@ -98,6 +98,8 @@ void NetworkManager::setupOTAUpdateServer() {
     else if (error == OTA_CONNECT_ERROR) Serial.println("OTA Connect Failed");
     else if (error == OTA_RECEIVE_ERROR) Serial.println("OTA Receive Failed");
     else if (error == OTA_END_ERROR) Serial.println("OTA End Failed");
+    ESP.reset();
+    delay(1000);
   });
   ArduinoOTA.begin();
   Serial.println("OTA Ready");
