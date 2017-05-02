@@ -1,4 +1,7 @@
+#pragma once
+
 #include "NetworkManager.h"
+#include "ColourGenerators.h"
 
 #include <DS1307RTC.h>
  
@@ -25,6 +28,28 @@ Timezone localTimeZone(BST, GMT);
 //CRGB leds[NUM_LEDS];
 CRGBArray<NUM_LEDS> leds;
 
+DEFINE_GRADIENT_PALETTE( retro2_16_gp ) {
+    0, 188,135,  1,
+  255,  46,  7,  1
+};
+
+DEFINE_GRADIENT_PALETTE( es_pinksplash_08_gp ) {
+    0, 126, 11,255,
+  127, 197,  1, 22,
+  175, 210,157,172,
+  221, 157,  3,112,
+  255, 157,  3,112
+};
+
+DEFINE_GRADIENT_PALETTE( Coral_reef_gp ) {
+    0,  40,199,197,
+   50,  10,152,155,
+   96,   1,111,120,
+   96,  43,127,162,
+  139,  10, 73,111,
+  255,   1, 34, 71
+};
+
 DEFINE_GRADIENT_PALETTE( heatmap_gp ) {
   0,     0,  0,  0,   //black
 128,   255,  0,  0,   //red
@@ -37,7 +62,13 @@ DEFINE_GRADIENT_PALETTE( blue_green ) {
  255,   255,255,255
 };
 
-CRGBPalette16 currentPalette = blue_green;
+CRGBPalette16 hourPalette = es_pinksplash_08_gp;
+CRGBPalette16 minutePalette = retro2_16_gp;
+CRGBPalette16 secondPalette = blue_green;
+
+//BasicClockColours clockColours(secondPalette);
+
+PalettePerHandClockColours clockColours(hourPalette, minutePalette, secondPalette);
 
 #define BRIGHTNESS          30
 #define FRAMES_PER_SECOND  120
@@ -70,6 +101,14 @@ void setup() {
   
   time_t rtcTime = RTC.get(); 
   if (rtcTime) {
+      unsigned long epochGMT = networkManager.getNTPTime();
+  
+      if(epochGMT != -1) {
+        RTC.set(epochGMT);
+        Serial.println("NTP is setting the system time");
+        printTime(epochGMT);
+      }
+    
     Serial.print("RTC already set rtcTime - ");
     Serial.println(rtcTime);
   } else {
@@ -135,7 +174,8 @@ void loop()
   
     // Generate a pattern
   //  rainbowWithGlitter();
-  
+
+    printTime(ukTime);
     displayTimeOnLedRing(ukTime);
   //  addGlitter(10);
     
@@ -187,21 +227,19 @@ void printTime(time_t epoch) {
   }
 }
 
-void setupGradientPalette()
-{
-//    // 'black out' all 16 palette entries...
-//    fill_solid( currentPalette, 16, CRGB::Black);
+//void setupGradientPalette()
+//{
+////    // 'black out' all 16 palette entries...
+////    fill_solid( currentPalette, 16, CRGB::Black);
+////    currentPalette[0] = CRGB::DarkBlue;
+////    currentPalette[1] = CRGB::Green;
+////    currentPalette[2] = CRGB::DarkBlue;
 //    currentPalette[0] = CRGB::DarkBlue;
-//    currentPalette[1] = CRGB::Green;
-//    currentPalette[2] = CRGB::DarkBlue;
-    currentPalette[0] = CRGB::DarkBlue;
-    currentPalette[255] = CRGB::Green;
-}
+//    currentPalette[255] = CRGB::Green;
+//}
 
 void displayTimeOnLedRing(time_t timeNow) 
 {
-  fill_solid(leds, NUM_LEDS, CRGB::Black);
-
   int hour_led = map(mod8(hour(timeNow), 12), 0, 11, 0, NUM_LEDS - 1);
   int minute_led = map(minute(timeNow), 0, 59, 0, NUM_LEDS - 1);
   int second_led = map(second(timeNow), 0, 59, 0, NUM_LEDS - 1);
@@ -213,15 +251,13 @@ void displayTimeOnLedRing(time_t timeNow)
   Serial.print(" ");
   Serial.println(second_led);
 
-  for(int i = 0; i < NUM_LEDS; ++i) {
-    if(i <= second_led) {
-        leds[i] += ColorFromPalette(currentPalette, i, 255, LINEARBLEND);
-    }
-  }
-
-  leds[hour_led] = CRGB::Green;
-  leds[minute_led] = CRGB::Red;
+  clockColours.setHandPositions(hour_led, minute_led, second_led);
   
+  for(int i = 0; i < NUM_LEDS; ++i) {
+    leds[i] = clockColours.getLedColour(i);
+  }
+  
+  clockColours.incrementIndex();
 }
 
 /*
