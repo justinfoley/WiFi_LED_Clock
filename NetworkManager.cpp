@@ -12,6 +12,8 @@ void configModeCallback (WiFiManager *myWiFiManager) {
 }
 
 void NetworkManager::configureAndConnectToWifi() {
+  WiFi.setSleepMode(WIFI_NONE_SLEEP);
+  
     //WiFiManager
   //Local intialization. Once its business is done, there is no need to keep it around
   WiFiManager wifiManager;

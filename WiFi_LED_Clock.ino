@@ -8,10 +8,11 @@
 #include <TimeLib.h>
 #include <Timezone.h>
 
-#define FASTLED_ALLOW_INTERRUPTS 0
-#include "FastLED.h"
+//#define FASTLED_INTERRUPT_RETRY_COUNT 0
+//#define FASTLED_ALLOW_INTERRUPTS 0
+//#include "FastLED.h"
 
-FASTLED_USING_NAMESPACE
+//FASTLED_USING_NAMESPACE
 
 //United Kingdom (London, Belfast)
 TimeChangeRule BST = {"BST", Last, Sun, Mar, 1, 60};        //British Summer Time
@@ -91,7 +92,7 @@ void setup() {
   FastLED.setMaxPowerInVoltsAndMilliamps(5, 3000);
 
 //  setupGradientPalette();
-  
+
   networkManager.configureAndConnectToWifi();
   networkManager.setupNTP();
 
@@ -101,13 +102,13 @@ void setup() {
   
   time_t rtcTime = RTC.get(); 
   if (rtcTime) {
-      unsigned long epochGMT = networkManager.getNTPTime();
-  
-      if(epochGMT != -1) {
-        RTC.set(epochGMT);
-        Serial.println("NTP is setting the system time");
-        printTime(epochGMT);
-      }
+//      unsigned long epochGMT = networkManager.getNTPTime();
+//  
+//      if(epochGMT != -1) {
+//        RTC.set(epochGMT);
+//        Serial.println("NTP is setting the system time");
+//        printTime(epochGMT);
+//      }
     
     Serial.print("RTC already set rtcTime - ");
     Serial.println(rtcTime);
@@ -175,7 +176,7 @@ void loop()
     // Generate a pattern
   //  rainbowWithGlitter();
 
-    printTime(ukTime);
+//    printTime(ukTime);
     displayTimeOnLedRing(ukTime);
   //  addGlitter(10);
     
@@ -240,9 +241,19 @@ void printTime(time_t epoch) {
 
 void displayTimeOnLedRing(time_t timeNow) 
 {
-  int hour_led = map(mod8(hour(timeNow), 12), 0, 11, 0, NUM_LEDS - 1);
-  int minute_led = map(minute(timeNow), 0, 59, 0, NUM_LEDS - 1);
   int second_led = map(second(timeNow), 0, 59, 0, NUM_LEDS - 1);
+  int minute_led = map(minute(timeNow), 0, 59, 0, NUM_LEDS - 1);
+  int hour_led = (mod8(hour(timeNow), 12) * 5) + (minute_led / 15);
+  
+//  map(mod8(hour(timeNow), 12), 0, 11, 0, NUM_LEDS - 1);
+
+
+  // Do a better mapping to the partial number moving further up hour as minute moves
+  // hour = 60 / 12 = five dots per hour
+  // minute = 60 / 60 = 1 dot per min. Seconds same.
+
+  // 0 to 11 * 5  40 45 50 55
+  // minute / 12 = add on
 
   Serial.print(" ");
   Serial.print(hour_led);

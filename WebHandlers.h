@@ -1,3 +1,4 @@
+#pragma once
 #include <ESP8266WebServer.h>
 #include <WiFiUdp.h>
 
