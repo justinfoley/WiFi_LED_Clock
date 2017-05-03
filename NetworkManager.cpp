@@ -43,6 +43,8 @@ void NetworkManager::configureAndConnectToWifi() {
     Serial.print(".");
   }
   Serial.println("");
+
+  WiFi.setSleepMode(WIFI_NONE_SLEEP);
   
   Serial.println("WiFi connected");
   Serial.println("IP address: ");

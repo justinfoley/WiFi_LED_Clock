@@ -1,5 +1,6 @@
 #pragma once
-#define FASTLED_ALLOW_INTERRUPTS 0
+#define FASTLED_INTERRUPT_RETRY_COUNT 0
+//#define FASTLED_ALLOW_INTERRUPTS 0
 #include "FastLED.h"
 
 class ClockColours {
@@ -45,7 +46,7 @@ class PalettePerHandClockColours: public ClockColours {
     }
 
     void incrementIndex() {
-      index = (index + 4) % 255;
+      index = (index + 2) % 255;
     }
   
     CRGB getLedColour(int ledIndex);
