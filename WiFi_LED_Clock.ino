@@ -91,11 +91,8 @@ void setup() {
   // set master brightness control
   FastLED.setBrightness(BRIGHTNESS);
 
-  FastLED.setMaxPowerInVoltsAndMilliamps(5, 2500);
+  FastLED.setMaxPowerInVoltsAndMilliamps(5, 2200);
   FastLED.setMaxRefreshRate(400);
-
-
-//  setupGradientPalette();
 
   networkManager.configureAndConnectToWifi();
   networkManager.setupNTP();
@@ -200,6 +197,7 @@ void loop()
   
   // wait ten seconds before asking for the time again
 //  delay(10000);
+
   networkManager.handleServerClients();
 }
 
