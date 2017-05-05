@@ -68,9 +68,11 @@ CRGBPalette16 hourPalette = es_pinksplash_08_gp;
 CRGBPalette16 minutePalette = retro2_16_gp;
 CRGBPalette16 secondPalette = blue_green;
 
-//BasicClockColours clockColours(secondPalette);
+StaticHandClockColours clockColours(CRGB::Green, CRGB::Red, CRGB::Blue);
+//PaletteTickClockColours clockColours(secondPalette, CRGB::Green, CRGB::Red);
 
-PalettePerHandClockColours clockColours(hourPalette, minutePalette, secondPalette);
+
+//PalettePerHandClockColours clockColours(hourPalette, minutePalette, secondPalette);
 
 #define BRIGHTNESS          30
 #define FRAMES_PER_SECOND  120

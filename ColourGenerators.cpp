@@ -1,12 +1,26 @@
 #include "ColourGenerators.h"
 #include <Arduino.h>
 
-CRGB BasicClockColours::getLedColour(int ledIndex) {
+CRGB StaticHandClockColours::getLedColour(int ledIndex) {
   if(ledIndex == hour_led) {
-    return CRGB::Green;
+    return hourColor;
   }
   else if(ledIndex == minute_led) {
-    return CRGB::Red;
+    return minuteColor;
+  }
+  else if(ledIndex == second_led) {
+      return secondColor;
+  } else {
+    return CRGB::Black;
+  }
+}
+
+CRGB PaletteTickClockColours::getLedColour(int ledIndex) {
+  if(ledIndex == hour_led) {
+    return hourColor;
+  }
+  else if(ledIndex == minute_led) {
+    return minuteColor;
   }
   else if(ledIndex <= second_led) {
       return ColorFromPalette(currentPalette, ledIndex, 255, LINEARBLEND);

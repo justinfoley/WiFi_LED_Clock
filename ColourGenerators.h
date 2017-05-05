@@ -18,16 +18,41 @@ class ClockColours {
       minute_led = m_led;
       second_led = s_led;
     }
+
+    virtual void incrementIndex() = 0;
     
     virtual CRGB getLedColour(int ledIndex) = 0;
 };
 
-class BasicClockColours: public ClockColours {
+class StaticHandClockColours: public ClockColours {
   protected:
-    CRGBPalette16& currentPalette;
+    CRGB::HTMLColorCode secondColor;
+    CRGB::HTMLColorCode hourColor;
+    CRGB::HTMLColorCode minuteColor;
 
   public:
-    BasicClockColours(CRGBPalette16& palette): currentPalette(palette) {
+    StaticHandClockColours(CRGB::HTMLColorCode hColor, CRGB::HTMLColorCode mColor, CRGB::HTMLColorCode sColor): 
+      hourColor(hColor), minuteColor(mColor), secondColor(sColor) {
+    }
+
+    void incrementIndex() {
+    }
+  
+    CRGB getLedColour(int ledIndex);
+};
+
+class PaletteTickClockColours: public ClockColours {
+  protected:
+    CRGBPalette16& currentPalette;
+    CRGB::HTMLColorCode hourColor;
+    CRGB::HTMLColorCode minuteColor;
+
+  public:
+    PaletteTickClockColours(CRGBPalette16& palette, CRGB::HTMLColorCode hColor, CRGB::HTMLColorCode mColor): 
+      currentPalette(palette), hourColor(hColor), minuteColor(mColor) {
+    }
+
+    void incrementIndex() {
     }
   
     CRGB getLedColour(int ledIndex);
