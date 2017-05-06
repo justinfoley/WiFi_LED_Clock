@@ -68,11 +68,25 @@ CRGBPalette16 hourPalette = es_pinksplash_08_gp;
 CRGBPalette16 minutePalette = retro2_16_gp;
 CRGBPalette16 secondPalette = blue_green;
 
-StaticHandClockColours clockColours(CRGB::Green, CRGB::Red, CRGB::Blue);
-//PaletteTickClockColours clockColours(secondPalette, CRGB::Green, CRGB::Red);
+StaticHandClockColours clockColours1(CRGB::Green, CRGB::Red, CRGB::Black);
+StaticHandClockColours clockColours2(CRGB::Green, CRGB::Red, CRGB::Blue);
+PaletteTickClockColours clockColours3(secondPalette, CRGB::Green, CRGB::Red);
+PalettePerHandClockColours clockColours4(hourPalette, minutePalette, secondPalette);
+
+ClockColours* clocksColourList[4] = {
+  &clockColours1,
+  &clockColours2,
+  &clockColours3,
+  &clockColours4
+};
 
 
-//PalettePerHandClockColours clockColours(hourPalette, minutePalette, secondPalette);
+//etl::vector<ClockColours*, 10> clocksColourList;
+//clocksColourList.push_back(&clockColours1);
+//clocksColourList.push_back(&clockColours2);
+//clocksColourList.push_back(&clockColours3);
+//clocksColourList.push_back(&clockColours4);
+
 
 #define BRIGHTNESS          30
 #define FRAMES_PER_SECOND  120
@@ -178,7 +192,8 @@ void loop()
   //  rainbowWithGlitter();
 
 //    printTime(ukTime);
-    displayTimeOnLedRing(ukTime);
+    ClockColours *currentClockColours = clocksColourList[2];
+    displayTimeOnLedRing(ukTime, currentClockColours);
   //  addGlitter(10);
     
     // send the 'leds' array out to the actual LED strip
@@ -242,7 +257,7 @@ void printTime(time_t epoch) {
 //    currentPalette[255] = CRGB::Green;
 //}
 
-void displayTimeOnLedRing(time_t timeNow) 
+void displayTimeOnLedRing(time_t timeNow, ClockColours *clockColours) 
 {
   int second_led = map(second(timeNow), 0, 59, 0, NUM_LEDS - 1);
 //  int minute_led = map(minute(timeNow), 0, 59, 0, NUM_LEDS - 1);
@@ -266,13 +281,15 @@ void displayTimeOnLedRing(time_t timeNow)
 //  Serial.print(" ");
 //  Serial.println(second_led);
 
-  clockColours.setHandPositions(hour_led, minute_led, second_led);
+
+
+  clockColours->setHandPositions(hour_led, minute_led, second_led);
   
   for(int i = 0; i < NUM_LEDS; ++i) {
-    leds[i] = clockColours.getLedColour(i);
+    leds[i] = clockColours->getLedColour(i);
   }
   
-  clockColours.incrementIndex();
+  clockColours->incrementIndex();
 }
 
 
