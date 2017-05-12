@@ -1,12 +1,19 @@
-class ClockState {
+#include "ColourGenerators.h"
+class ClockState2 {
   protected:
     int lastNtpUpdate;
-    int colourScheme;
+    int currentColourScheme;
+    ClockColours** clocksColourList;
+    int clocksColourListLength;
 
 public:
-  /// create an led controller object, add it to the chain of controllers
-    ClockState() : lastNtpUpdate(-1), colourScheme(0) {
+    ClockState2(int ntpUpdate, int colourScheme, ClockColours** colourList, int colourListLength) : 
+      lastNtpUpdate(ntpUpdate), currentColourScheme(colourScheme), clocksColourList(colourList), clocksColourListLength(colourListLength) {
     }
 
     void setNtpUpdate(int datetime);
 
+    void printState() {
+      Serial.println(clocksColourList[1]->getLedColour(0));
+    }
+};

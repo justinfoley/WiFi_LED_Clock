@@ -1,4 +1,5 @@
 #pragma once
+#include <FS.h>
 #include <ESP8266WebServer.h>
 #include <WiFiUdp.h>
 
@@ -8,9 +9,7 @@ class WebHandlers {
 
     void handleRoot();
     void handleNotFound();
-    void handleUpdateIndex();
-    void handleUpdateUpload1();
-    void handleUpdateUpload2();
+    void handleClockChoice();
 
   public:
     WebHandlers(ESP8266WebServer& webServer_): webServer(webServer_)  {

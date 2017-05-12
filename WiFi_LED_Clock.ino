@@ -1,7 +1,9 @@
 #pragma once
 
+//#include "vector.h"
+
+#include "ClockState.h"
 #include "NetworkManager.h"
-#include "ColourGenerators.h"
 
 #include <DS1307RTC.h>
  
@@ -26,6 +28,8 @@ Timezone localTimeZone(BST, GMT);
 #define LED_TYPE  NEOPIXEL
 #define COLOR_ORDER GRB
 #define NUM_LEDS    60
+
+#define LIGHT_SENSOR_PIN  D0
 
 //CRGB leds[NUM_LEDS];
 CRGBArray<NUM_LEDS> leds;
@@ -73,19 +77,25 @@ StaticHandClockColours clockColours2(CRGB::Green, CRGB::Red, CRGB::Blue);
 PaletteTickClockColours clockColours3(secondPalette, CRGB::Green, CRGB::Red);
 PalettePerHandClockColours clockColours4(hourPalette, minutePalette, secondPalette);
 
-ClockColours* clocksColourList[4] = {
+const int clocksColourListLength = 4;
+ClockColours* clocksColourList[clocksColourListLength] = {
   &clockColours1,
   &clockColours2,
   &clockColours3,
   &clockColours4
 };
+//
+//etl::vector<int, 10> v1;
+//v1.push_back(1);
+//v1.push_back(2);
 
-
-//etl::vector<ClockColours*, 10> clocksColourList;
+//etl::vector<ClockColours*, 4> clocksColourList;
 //clocksColourList.push_back(&clockColours1);
 //clocksColourList.push_back(&clockColours2);
 //clocksColourList.push_back(&clockColours3);
 //clocksColourList.push_back(&clockColours4);
+
+ClockState2 clockState(-1, 0, clocksColourList, clocksColourListLength);
 
 
 #define BRIGHTNESS          30
@@ -100,8 +110,12 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
 
-  // tell FastLED about the LED strip configuration
-//  FastLED.addLeds<LED_TYPE, LED_DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
+  printInfo();
+
+  pinMode(LIGHT_SENSOR_PIN, INPUT); 
+
+  clockState.printState();
+
   FastLED.addLeds<LED_TYPE, LED_DATA_PIN>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
 
   // set master brightness control
@@ -185,6 +199,13 @@ void loop()
 //  displayTimeOnLedRing(rtcTime);
 
   EVERY_N_MILLISECONDS( 100 ) {
+    bool isNightMode = checkNightMode();
+    if(isNightMode) {
+      Serial.println("Night Mode");
+    } else {
+      Serial.println("Not night Mode");
+    }
+    
     time_t utc = now();
     time_t ukTime = localTimeZone.toLocal(utc);
   
@@ -218,6 +239,18 @@ void loop()
   networkManager.handleServerClients();
 }
 
+
+bool checkNightMode() {
+  Serial.println(digitalRead(LIGHT_SENSOR_PIN));
+  if (digitalRead(LIGHT_SENSOR_PIN))
+  {
+    Serial.println("NIGHT TIME!!");
+  } else {
+    Serial.println("DAY TIME!!");
+  }
+  
+  return digitalRead(LIGHT_SENSOR_PIN);
+}
 
 void printTime(time_t epoch) {
   if(epoch != -1) {
@@ -292,6 +325,18 @@ void displayTimeOnLedRing(time_t timeNow, ClockColours *clockColours)
   clockColours->incrementIndex();
 }
 
+void printInfo() {
+  Serial.println();
+  Serial.print( F("Heap: ") ); Serial.println(system_get_free_heap_size());
+  Serial.print( F("Boot Vers: ") ); Serial.println(system_get_boot_version());
+  Serial.print( F("CPU: ") ); Serial.println(system_get_cpu_freq());
+  Serial.print( F("SDK: ") ); Serial.println(system_get_sdk_version());
+  Serial.print( F("Chip ID: ") ); Serial.println(system_get_chip_id());
+  Serial.print( F("Flash ID: ") ); Serial.println(spi_flash_get_id());
+  Serial.print( F("Flash Size: ") ); Serial.println(ESP.getFlashChipRealSize());
+  Serial.print( F("Vcc: ") ); Serial.println(ESP.getVcc());
+  Serial.println();
+}
 
 
 /*
