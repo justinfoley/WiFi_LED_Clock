@@ -2,7 +2,7 @@
 
 //#include "vector.h"
 
-#include "ClockState.h"
+//#include "ClockState.h"
 #include "NetworkManager.h"
 
 #include <DS1307RTC.h>
@@ -95,7 +95,7 @@ ClockColours* clocksColourList[clocksColourListLength] = {
 //clocksColourList.push_back(&clockColours3);
 //clocksColourList.push_back(&clockColours4);
 
-ClockState2 clockState(-1, 0, clocksColourList, clocksColourListLength);
+ClockState clockState(-1, 0, clocksColourList, clocksColourListLength);
 
 
 #define BRIGHTNESS          30
@@ -104,7 +104,7 @@ ClockState2 clockState(-1, 0, clocksColourList, clocksColourListLength);
 #define NTP_RESYNC_FREQUENCY 300
 #define RTC_RESYNC_FREQUENCY 30
 
-NetworkManager networkManager;
+NetworkManager networkManager(clockState);
 
 void setup() {
   // put your setup code here, to run once:
@@ -200,11 +200,11 @@ void loop()
 
   EVERY_N_MILLISECONDS( 100 ) {
     bool isNightMode = checkNightMode();
-    if(isNightMode) {
-      Serial.println("Night Mode");
-    } else {
-      Serial.println("Not night Mode");
-    }
+//    if(isNightMode) {
+//      Serial.println("Night Mode");
+//    } else {
+//      Serial.println("Not night Mode");
+//    }
     
     time_t utc = now();
     time_t ukTime = localTimeZone.toLocal(utc);
@@ -213,7 +213,8 @@ void loop()
   //  rainbowWithGlitter();
 
 //    printTime(ukTime);
-    ClockColours *currentClockColours = clocksColourList[2];
+    ClockColours *currentClockColours = clocksColourList[clockState.getCurrentColourScheme()];
+    Serial.println(currentClockColours->getDescription());
     displayTimeOnLedRing(ukTime, currentClockColours);
   //  addGlitter(10);
     
@@ -241,14 +242,6 @@ void loop()
 
 
 bool checkNightMode() {
-  Serial.println(digitalRead(LIGHT_SENSOR_PIN));
-  if (digitalRead(LIGHT_SENSOR_PIN))
-  {
-    Serial.println("NIGHT TIME!!");
-  } else {
-    Serial.println("DAY TIME!!");
-  }
-  
   return digitalRead(LIGHT_SENSOR_PIN);
 }
 

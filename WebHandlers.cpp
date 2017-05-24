@@ -14,17 +14,23 @@ void WebHandlers::setupHandlers() {
   webServer.serveStatic("/images", SPIFFS, "/images", "max-age=86400");
   webServer.serveStatic("/", SPIFFS, "/index.htm");
 
-  webServer.on("/clock", HTTP_POST, std::bind(&WebHandlers::handleClockChoice, this));
+  webServer.on("/face", HTTP_POST, std::bind(&WebHandlers::handleClockChoice, this));
+  webServer.on("/face", HTTP_GET, std::bind(&WebHandlers::handleClockFace, this));
 }
 
 void WebHandlers::handleRoot() {
   webServer.send(200, "text/plain", "hello from esp8266 root!");
 }
 
+void WebHandlers::handleClockFace() {  
+  webServer.send(200, "application/json", clockState.getClocksColourNamesJSON());
+}
+
 void WebHandlers::handleClockChoice() {
   String value = webServer.arg("value");
   Serial.print("Clock choice: ");
   Serial.println(value);
+  clockState.setCurrentColourScheme(value.toInt());
   webServer.send(200, "text/plain", "New clock chosen");
 }
 

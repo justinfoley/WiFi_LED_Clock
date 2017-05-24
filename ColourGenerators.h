@@ -22,6 +22,7 @@ class ClockColours {
     virtual void incrementIndex() = 0;
     
     virtual CRGB getLedColour(int ledIndex) = 0;
+    virtual String getDescription() = 0;
 };
 
 class StaticHandClockColours: public ClockColours {
@@ -39,6 +40,10 @@ class StaticHandClockColours: public ClockColours {
     }
   
     CRGB getLedColour(int ledIndex);
+
+    String getDescription() {
+      return "Static Hands";
+    }
 };
 
 class PaletteTickClockColours: public ClockColours {
@@ -56,6 +61,10 @@ class PaletteTickClockColours: public ClockColours {
     }
   
     CRGB getLedColour(int ledIndex);
+
+    String getDescription() {
+      return "Palette Tick Hands";
+    }
 };
 
 class PalettePerHandClockColours: public ClockColours {
@@ -75,4 +84,8 @@ class PalettePerHandClockColours: public ClockColours {
     }
   
     CRGB getLedColour(int ledIndex);
+
+    String getDescription() {
+      return "A palette per hand";
+    }
 };

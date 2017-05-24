@@ -35,7 +35,7 @@ class NetworkManager {
     boolean connected = false;
 
   public:
-    NetworkManager() : lastNtpUpdate(-1), localPort(2390), webServer(80), webHandlers(webServer) {
+    NetworkManager(ClockState& clockState) : lastNtpUpdate(-1), localPort(2390), webServer(80), webHandlers(webServer, clockState) {
       
     }
 
