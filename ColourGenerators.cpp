@@ -1,7 +1,7 @@
 #include "ColourGenerators.h"
 #include <Arduino.h>
 
-CRGB StaticHandClockColours::getLedColour(int ledIndex) {
+CRGB StaticHandClockFace::getLedColour(int ledIndex) {
   if(ledIndex == hour_led) {
     return hourColor;
   }
@@ -15,7 +15,7 @@ CRGB StaticHandClockColours::getLedColour(int ledIndex) {
   }
 }
 
-CRGB PaletteTickClockColours::getLedColour(int ledIndex) {
+CRGB PaletteTickClockFace::getLedColour(int ledIndex) {
   if(ledIndex == hour_led) {
     return hourColor;
   }
@@ -29,7 +29,7 @@ CRGB PaletteTickClockColours::getLedColour(int ledIndex) {
   }
 }
 
-CRGB PalettePerHandClockColours::getLedColour(int ledIndex) {
+CRGB PalettePerHandClockFace::getLedColour(int ledIndex) {
 //  Serial.println(index);
   if(ledIndex == hour_led) {
     return ColorFromPalette(hourPalette, index, 255, LINEARBLEND);

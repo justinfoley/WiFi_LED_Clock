@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Sound.h"
+
 //#include "vector.h"
 
 //#include "ClockState.h"
@@ -72,30 +74,20 @@ CRGBPalette16 hourPalette = es_pinksplash_08_gp;
 CRGBPalette16 minutePalette = retro2_16_gp;
 CRGBPalette16 secondPalette = blue_green;
 
-StaticHandClockColours clockColours1(CRGB::Green, CRGB::Red, CRGB::Black);
-StaticHandClockColours clockColours2(CRGB::Green, CRGB::Red, CRGB::Blue);
-PaletteTickClockColours clockColours3(secondPalette, CRGB::Green, CRGB::Red);
-PalettePerHandClockColours clockColours4(hourPalette, minutePalette, secondPalette);
+StaticHandClockFace clockFace1(CRGB::Green, CRGB::Red, CRGB::Black);
+StaticHandClockFace clockFace2(CRGB::Green, CRGB::Red, CRGB::Blue);
+PaletteTickClockFace clockFace3(secondPalette, CRGB::Green, CRGB::Red);
+PalettePerHandClockFace clockFace4(hourPalette, minutePalette, secondPalette);
 
-const int clocksColourListLength = 4;
-ClockColours* clocksColourList[clocksColourListLength] = {
-  &clockColours1,
-  &clockColours2,
-  &clockColours3,
-  &clockColours4
+const int clocksFaceListLength = 4;
+ClockFace* clocksFaceList[clocksFaceListLength] = {
+  &clockFace1,
+  &clockFace2,
+  &clockFace3,
+  &clockFace4
 };
-//
-//etl::vector<int, 10> v1;
-//v1.push_back(1);
-//v1.push_back(2);
 
-//etl::vector<ClockColours*, 4> clocksColourList;
-//clocksColourList.push_back(&clockColours1);
-//clocksColourList.push_back(&clockColours2);
-//clocksColourList.push_back(&clockColours3);
-//clocksColourList.push_back(&clockColours4);
-
-ClockState clockState(-1, 0, clocksColourList, clocksColourListLength);
+ClockState clockState(-1, 0, clocksFaceList, clocksFaceListLength);
 
 
 #define BRIGHTNESS          30
@@ -105,6 +97,8 @@ ClockState clockState(-1, 0, clocksColourList, clocksColourListLength);
 #define RTC_RESYNC_FREQUENCY 30
 
 NetworkManager networkManager(clockState);
+
+
 
 void setup() {
   // put your setup code here, to run once:
@@ -166,6 +160,8 @@ void setup() {
 
   setSyncInterval(RTC_RESYNC_FREQUENCY);
   setSyncProvider(timeSync);   // the function to get the time from the RTC
+
+  wav_setup();
 }
 
 time_t timeSync() // called periodically by Time library to syncronise itself
@@ -213,9 +209,9 @@ void loop()
   //  rainbowWithGlitter();
 
 //    printTime(ukTime);
-    ClockColours *currentClockColours = clocksColourList[clockState.getCurrentColourScheme()];
-    Serial.println(currentClockColours->getDescription());
-    displayTimeOnLedRing(ukTime, currentClockColours);
+    ClockFace *currentClockFace = clocksFaceList[clockState.getCurrentClockFaceNumber()];
+    Serial.println(currentClockFace->getDescription());
+    displayTimeOnLedRing(ukTime, currentClockFace);
   //  addGlitter(10);
     
     // send the 'leds' array out to the actual LED strip
@@ -238,6 +234,12 @@ void loop()
 //  delay(10000);
 
   networkManager.handleServerClients();
+
+//  EVERY_N_SECONDS( 30 ) {
+//    wav_startPlayingFile("/sounds/cuckoo_clock2_16w.wav");
+//  }
+
+  wav_loop();
 }
 
 
@@ -283,7 +285,7 @@ void printTime(time_t epoch) {
 //    currentPalette[255] = CRGB::Green;
 //}
 
-void displayTimeOnLedRing(time_t timeNow, ClockColours *clockColours) 
+void displayTimeOnLedRing(time_t timeNow, ClockFace *clockFace) 
 {
   int second_led = map(second(timeNow), 0, 59, 0, NUM_LEDS - 1);
 //  int minute_led = map(minute(timeNow), 0, 59, 0, NUM_LEDS - 1);
@@ -309,13 +311,13 @@ void displayTimeOnLedRing(time_t timeNow, ClockColours *clockColours)
 
 
 
-  clockColours->setHandPositions(hour_led, minute_led, second_led);
+  clockFace->setHandPositions(hour_led, minute_led, second_led);
   
   for(int i = 0; i < NUM_LEDS; ++i) {
-    leds[i] = clockColours->getLedColour(i);
+    leds[i] = clockFace->getLedColour(i);
   }
   
-  clockColours->incrementIndex();
+  clockFace->incrementIndex();
 }
 
 void printInfo() {

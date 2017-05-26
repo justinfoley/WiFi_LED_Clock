@@ -12,6 +12,7 @@ void WebHandlers::setupHandlers() {
   webServer.serveStatic("/js", SPIFFS, "/js");
   webServer.serveStatic("/css", SPIFFS, "/css", "max-age=86400");
   webServer.serveStatic("/images", SPIFFS, "/images", "max-age=86400");
+  webServer.serveStatic("/sounds", SPIFFS, "/sounds", "max-age=86400");
   webServer.serveStatic("/", SPIFFS, "/index.htm");
 
   webServer.on("/face", HTTP_POST, std::bind(&WebHandlers::handleClockChoice, this));
@@ -23,14 +24,14 @@ void WebHandlers::handleRoot() {
 }
 
 void WebHandlers::handleClockFace() {  
-  webServer.send(200, "application/json", clockState.getClocksColourNamesJSON());
+  webServer.send(200, "application/json", clockState.getClockFaceNamesJSON());
 }
 
 void WebHandlers::handleClockChoice() {
   String value = webServer.arg("value");
   Serial.print("Clock choice: ");
   Serial.println(value);
-  clockState.setCurrentColourScheme(value.toInt());
+  clockState.setCurrentClockFaceNumber(value.toInt());
   webServer.send(200, "text/plain", "New clock chosen");
 }
 
