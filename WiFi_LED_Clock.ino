@@ -74,10 +74,10 @@ CRGBPalette16 hourPalette = es_pinksplash_08_gp;
 CRGBPalette16 minutePalette = retro2_16_gp;
 CRGBPalette16 secondPalette = blue_green;
 
-StaticHandClockFace clockFace1(CRGB::Green, CRGB::Red, CRGB::Black);
-StaticHandClockFace clockFace2(CRGB::Green, CRGB::Red, CRGB::Blue);
-PaletteTickClockFace clockFace3(secondPalette, CRGB::Green, CRGB::Red);
-PalettePerHandClockFace clockFace4(hourPalette, minutePalette, secondPalette);
+StaticHandClockFace clockFace1("Static hands - RG and no second hand", CRGB::Green, CRGB::Red, CRGB::Black);
+StaticHandClockFace clockFace2("Static hands - RGB", CRGB::Green, CRGB::Red, CRGB::Blue);
+PaletteTickClockFace clockFace3("Palette Tick Hands - RG, Blue to Green sweep", secondPalette, CRGB::Green, CRGB::Red);
+PalettePerHandClockFace clockFace4("A palette per hand - Blue to Green sweep", hourPalette, minutePalette, secondPalette);
 
 const int clocksFaceListLength = 4;
 ClockFace* clocksFaceList[clocksFaceListLength] = {
@@ -209,8 +209,9 @@ void loop()
   //  rainbowWithGlitter();
 
 //    printTime(ukTime);
+//    Serial.println(currentClockFace->getDescription());
+
     ClockFace *currentClockFace = clocksFaceList[clockState.getCurrentClockFaceNumber()];
-    Serial.println(currentClockFace->getDescription());
     displayTimeOnLedRing(ukTime, currentClockFace);
   //  addGlitter(10);
     

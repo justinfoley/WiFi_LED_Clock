@@ -8,9 +8,10 @@ class ClockFace {
     int hour_led;
     int minute_led;
     int second_led;
+    String description;
 
   public:
-    ClockFace() {
+    ClockFace(String description_) : description(description_) {
     }
 
     void setHandPositions(int h_led, int m_led, int s_led) {
@@ -19,10 +20,13 @@ class ClockFace {
       second_led = s_led;
     }
 
+    String getDescription() {
+      return description;
+    }
+
     virtual void incrementIndex() = 0;
     
     virtual CRGB getLedColour(int ledIndex) = 0;
-    virtual String getDescription() = 0;
 };
 
 class StaticHandClockFace: public ClockFace {
@@ -32,18 +36,14 @@ class StaticHandClockFace: public ClockFace {
     CRGB::HTMLColorCode minuteColor;
 
   public:
-    StaticHandClockFace(CRGB::HTMLColorCode hColor, CRGB::HTMLColorCode mColor, CRGB::HTMLColorCode sColor): 
-      hourColor(hColor), minuteColor(mColor), secondColor(sColor) {
+    StaticHandClockFace(String description, CRGB::HTMLColorCode hColor, CRGB::HTMLColorCode mColor, CRGB::HTMLColorCode sColor): 
+      ClockFace(description), hourColor(hColor), minuteColor(mColor), secondColor(sColor) {
     }
 
     void incrementIndex() {
     }
   
     CRGB getLedColour(int ledIndex);
-
-    String getDescription() {
-      return "Static Hands";
-    }
 };
 
 class PaletteTickClockFace: public ClockFace {
@@ -53,18 +53,14 @@ class PaletteTickClockFace: public ClockFace {
     CRGB::HTMLColorCode minuteColor;
 
   public:
-    PaletteTickClockFace(CRGBPalette16& palette, CRGB::HTMLColorCode hColor, CRGB::HTMLColorCode mColor): 
-      currentPalette(palette), hourColor(hColor), minuteColor(mColor) {
+    PaletteTickClockFace(String description, CRGBPalette16& palette, CRGB::HTMLColorCode hColor, CRGB::HTMLColorCode mColor): 
+      ClockFace(description), currentPalette(palette), hourColor(hColor), minuteColor(mColor) {
     }
 
     void incrementIndex() {
     }
   
     CRGB getLedColour(int ledIndex);
-
-    String getDescription() {
-      return "Palette Tick Hands";
-    }
 };
 
 class PalettePerHandClockFace: public ClockFace {
@@ -75,8 +71,8 @@ class PalettePerHandClockFace: public ClockFace {
     CRGBPalette16& secondPalette;
   
   public:
-    PalettePerHandClockFace(CRGBPalette16& hPalette, CRGBPalette16& mPalette, CRGBPalette16& sPalette): 
-      hourPalette(hPalette), minutePalette(mPalette), secondPalette(sPalette) {
+    PalettePerHandClockFace(String description, CRGBPalette16& hPalette, CRGBPalette16& mPalette, CRGBPalette16& sPalette): 
+      ClockFace(description), hourPalette(hPalette), minutePalette(mPalette), secondPalette(sPalette) {
     }
 
     void incrementIndex() {
@@ -84,8 +80,4 @@ class PalettePerHandClockFace: public ClockFace {
     }
   
     CRGB getLedColour(int ledIndex);
-
-    String getDescription() {
-      return "A palette per hand";
-    }
 };
