@@ -1,22 +1,12 @@
 #pragma once
 
-#include "Sound.h"
-
-//#include "vector.h"
-
-//#include "ClockState.h"
 #include "NetworkManager.h"
+#include "Sound.h"
 
 #include <DS1307RTC.h>
  
 #include <TimeLib.h>
 #include <Timezone.h>
-
-//#define FASTLED_INTERRUPT_RETRY_COUNT 0
-//#define FASTLED_ALLOW_INTERRUPTS 0
-//#include "FastLED.h"
-
-//FASTLED_USING_NAMESPACE
 
 //United Kingdom (London, Belfast)
 TimeChangeRule BST = {"BST", Last, Sun, Mar, 1, 60};        //British Summer Time
@@ -24,16 +14,12 @@ TimeChangeRule GMT = {"GMT", Last, Sun, Oct, 2, 0};         //Standard Time
 Timezone localTimeZone(BST, GMT);
 
 #define LED_DATA_PIN    6
-//#define CLK_PIN   4
-//#define LED_TYPE    WS2811
-//#define LED_TYPE  WS2812B
 #define LED_TYPE  NEOPIXEL
 #define COLOR_ORDER GRB
 #define NUM_LEDS    60
 
 #define LIGHT_SENSOR_PIN  D0
 
-//CRGB leds[NUM_LEDS];
 CRGBArray<NUM_LEDS> leds;
 
 DEFINE_GRADIENT_PALETTE( retro2_16_gp ) {
@@ -87,7 +73,7 @@ ClockFace* clocksFaceList[clocksFaceListLength] = {
   &clockFace4
 };
 
-ClockState clockState(-1, 0, clocksFaceList, clocksFaceListLength);
+ClockState clockState(-1, 1, clocksFaceList, clocksFaceListLength);
 
 
 #define BRIGHTNESS          30
@@ -97,7 +83,6 @@ ClockState clockState(-1, 0, clocksFaceList, clocksFaceListLength);
 #define RTC_RESYNC_FREQUENCY 30
 
 NetworkManager networkManager(clockState);
-
 
 
 void setup() {
@@ -162,6 +147,33 @@ void setup() {
   setSyncProvider(timeSync);   // the function to get the time from the RTC
 
   wav_setup();
+
+  int chimesListLength = 0;
+
+  Dir dir = SPIFFS.openDir("/sounds");
+  while (dir.next()) {
+//    Serial.println(dir.fileName());
+//    clockState.addSoundFile("X");
+    chimesListLength++;
+  }
+
+  String chimesList[chimesListLength];
+
+  dir = SPIFFS.openDir("/sounds");
+  int i = 0;
+  while (dir.next()) {
+    chimesList[i++] = dir.fileName();
+//    String x = String(i + 1);
+//    chimesList[i++] = x;
+  }
+
+//  for (uint8_t i = 0; i < chimesListLength; i++)
+//  {
+//    Serial.println(chimesList[i]);
+//  }
+
+  clockState.addChimeFiles(chimesList, chimesListLength);
+  
 }
 
 time_t timeSync() // called periodically by Time library to syncronise itself
@@ -221,19 +233,6 @@ void loop()
 //    FastLED.delay(1000/FRAMES_PER_SECOND); 
   }
   
-//  showNTPTime();
-
-//  displayTimeOnLedRing(epoch);
-//  addGlitter(10);
-  
-  // send the 'leds' array out to the actual LED strip
-//  FastLED.show();
-  // insert a delay to keep the framerate modest
-//  FastLED.delay(1000/FRAMES_PER_SECOND); 
-  
-  // wait ten seconds before asking for the time again
-//  delay(10000);
-
   networkManager.handleServerClients();
 
 //  EVERY_N_SECONDS( 30 ) {
@@ -333,12 +332,4 @@ void printInfo() {
   Serial.print( F("Vcc: ") ); Serial.println(ESP.getVcc());
   Serial.println();
 }
-
-
-/*
- * Colour modes pure colours - blue seconds, red minute, green hour
- * 
- * 
- * 
-*/
 

@@ -11,8 +11,10 @@ class WebHandlers {
 
     void handleRoot();
     void handleNotFound();
-    void handleClockChoice();
-    void handleClockFace();
+    void setCurrentClockFace();
+    void setCurrentClockChime();
+    void testCurrentClockChime();
+    void getClockState();
 
   public:
     WebHandlers(ESP8266WebServer& webServer_, ClockState& clockState_): webServer(webServer_), clockState(clockState_)  {

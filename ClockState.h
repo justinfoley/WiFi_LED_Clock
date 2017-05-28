@@ -1,43 +1,48 @@
+#pragma once
+
 #include "ClockFaces.h"
+#include "Vector.h"
+//#include <stdlib.h>
+//#include <ArduinoSTL.h>
+
 class ClockState {
   protected:
     int lastNtpUpdate;
     int currentFaceNumber;
+    int currentChimeNumber;
     ClockFace** faceList;
     int faceListLength;
+    String* chimeList;
+    int chimesListLength;
+
+//    vector<String> getSoundFileList() {
+//      vector<String> soundFiles;
+//      
+////      Dir dir = SPIFFS.openDir("/sounds");
+////      while (dir.next()) {
+////        soundFiles.push_back(String(dir.fileName()));
+////      }
+//
+//      return soundFiles;
+//    }
 
   public:
-    ClockState(int ntpUpdate, int faceNumber, ClockFace** faceList_, int faceListLength_) : 
-      lastNtpUpdate(ntpUpdate), currentFaceNumber(faceNumber), faceList(faceList_), faceListLength(faceListLength_) {
-    }
+    ClockState(int ntpUpdate, int faceNumber, ClockFace** faceList_, int faceListLength_);
 
+    void addChimeFiles(String* chimes, int chimesListLength);
     void setNtpUpdate(int datetime);
 
-    int getFaceListLength() {
-      return faceListLength;
-    }
+    int getFaceListLength();
 
-    String getClockFaceNamesJSON() {
-      String json = "[";
-      for (uint8_t i = 0; i < faceListLength; i++)
-      {
-        json += "\"" + faceList[i]->getDescription() + "\"";
-        if (i < faceListLength - 1)
-          json += ",";
-      }
-      json += "]";
-      return json;
-    }
+    String getClockStateJSON();
 
-    int getCurrentClockFaceNumber() {
-      return currentFaceNumber;
-    }
+    int getCurrentClockFaceNumber();
 
-    void setCurrentClockFaceNumber(int number) {
-      currentFaceNumber = number;
-    }
+    void setCurrentClockFaceNumber(int number);
 
-    void printState() {
-      Serial.println(faceList[1]->getLedColour(0));
-    }
+    void setCurrentClockChimeNumber(int number);
+
+    void testCurrentClockChime();
+
+    void printState();
 };

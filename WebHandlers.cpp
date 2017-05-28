@@ -15,24 +15,40 @@ void WebHandlers::setupHandlers() {
   webServer.serveStatic("/sounds", SPIFFS, "/sounds", "max-age=86400");
   webServer.serveStatic("/", SPIFFS, "/index.htm");
 
-  webServer.on("/face", HTTP_POST, std::bind(&WebHandlers::handleClockChoice, this));
-  webServer.on("/face", HTTP_GET, std::bind(&WebHandlers::handleClockFace, this));
+  webServer.on("/face", HTTP_POST, std::bind(&WebHandlers::setCurrentClockFace, this));
+  webServer.on("/chime", HTTP_POST, std::bind(&WebHandlers::setCurrentClockChime, this));
+  webServer.on("/testChime", HTTP_POST, std::bind(&WebHandlers::testCurrentClockChime, this));
+  webServer.on("/state", HTTP_GET, std::bind(&WebHandlers::getClockState, this));
 }
 
 void WebHandlers::handleRoot() {
   webServer.send(200, "text/plain", "hello from esp8266 root!");
 }
 
-void WebHandlers::handleClockFace() {  
-  webServer.send(200, "application/json", clockState.getClockFaceNamesJSON());
+void WebHandlers::getClockState() {  
+  webServer.send(200, "application/json", clockState.getClockStateJSON());
 }
 
-void WebHandlers::handleClockChoice() {
+void WebHandlers::setCurrentClockFace() {
   String value = webServer.arg("value");
-  Serial.print("Clock choice: ");
+  Serial.print("Clock face choice: ");
   Serial.println(value);
   clockState.setCurrentClockFaceNumber(value.toInt());
   webServer.send(200, "text/plain", "New clock chosen");
+}
+
+void WebHandlers::setCurrentClockChime() {
+  String value = webServer.arg("value");
+  Serial.print("Clock chime choice: ");
+  Serial.println(value);
+  clockState.setCurrentClockChimeNumber(value.toInt());
+  webServer.send(200, "text/plain", "New chime chosen");
+}
+
+void WebHandlers::testCurrentClockChime() {
+  Serial.print("Testing current chime");
+  clockState.testCurrentClockChime();
+  webServer.send(200, "text/plain", "Testing chime");
 }
 
 void WebHandlers::handleNotFound(){
