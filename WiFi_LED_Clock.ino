@@ -22,6 +22,7 @@ Timezone localTimeZone(BST, GMT);
 
 CRGBArray<NUM_LEDS> leds;
 
+
 DEFINE_GRADIENT_PALETTE( retro2_16_gp ) {
     0, 188,135,  1,
   255,  46,  7,  1
@@ -59,6 +60,7 @@ DEFINE_GRADIENT_PALETTE( blue_green ) {
 CRGBPalette16 hourPalette = es_pinksplash_08_gp;
 CRGBPalette16 minutePalette = retro2_16_gp;
 CRGBPalette16 secondPalette = blue_green;
+
 
 StaticHandClockFace clockFace1("Static hands - RG and no second hand", CRGB::Green, CRGB::Red, CRGB::Black);
 StaticHandClockFace clockFace2("Static hands - RGB", CRGB::Green, CRGB::Red, CRGB::Blue);

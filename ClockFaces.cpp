@@ -43,3 +43,4 @@ CRGB PalettePerHandClockFace::getLedColour(int ledIndex) {
     return CRGB::Black;
   }
 }
+
