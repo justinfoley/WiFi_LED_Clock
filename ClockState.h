@@ -5,6 +5,8 @@
 //#include <stdlib.h>
 //#include <ArduinoSTL.h>
 
+
+
 class ClockState {
   protected:
     int lastNtpUpdate;
@@ -27,7 +29,7 @@ class ClockState {
 //    }
 
   public:
-    ClockState(int ntpUpdate, int faceNumber, ClockFace** faceList_, int faceListLength_);
+    ClockState(int ntpUpdate, int faceNumber);
 
     void addChimeFiles(String* chimes, int chimesListLength);
     void setNtpUpdate(int datetime);
@@ -38,6 +40,8 @@ class ClockState {
 
     int getCurrentClockFaceNumber();
 
+    ClockFace* getCurrentClockFace();
+
     void setCurrentClockFaceNumber(int number);
 
     void setCurrentClockChimeNumber(int number);
@@ -46,3 +50,5 @@ class ClockState {
 
     void printState();
 };
+
+

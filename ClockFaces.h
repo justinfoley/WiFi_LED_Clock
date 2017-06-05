@@ -8,7 +8,12 @@ class ClockFace {
     int hour_led;
     int minute_led;
     int second_led;
+    int index = 0;
     String description;
+
+    CRGB highLightLed(CRGB colour) {
+      return colour.addToRGB(50);
+    }
 
   public:
     ClockFace(String description_) : description(description_) {
@@ -24,7 +29,9 @@ class ClockFace {
       return description;
     }
 
-    virtual void incrementIndex() = 0;
+    void incrementIndex() {
+      index = (index + 1) % 255;
+    }
     
     virtual CRGB getLedColour(int ledIndex) = 0;
 };
@@ -38,9 +45,6 @@ class StaticHandClockFace: public ClockFace {
   public:
     StaticHandClockFace(String description, CRGB::HTMLColorCode hColor, CRGB::HTMLColorCode mColor, CRGB::HTMLColorCode sColor): 
       ClockFace(description), hourColor(hColor), minuteColor(mColor), secondColor(sColor) {
-    }
-
-    void incrementIndex() {
     }
   
     CRGB getLedColour(int ledIndex);
@@ -56,16 +60,12 @@ class PaletteTickClockFace: public ClockFace {
     PaletteTickClockFace(String description, CRGBPalette16& palette, CRGB::HTMLColorCode hColor, CRGB::HTMLColorCode mColor): 
       ClockFace(description), currentPalette(palette), hourColor(hColor), minuteColor(mColor) {
     }
-
-    void incrementIndex() {
-    }
   
     CRGB getLedColour(int ledIndex);
 };
 
 class PalettePerHandClockFace: public ClockFace {
   protected:
-    int index = 0;
     CRGBPalette16& hourPalette;
     CRGBPalette16& minutePalette;
     CRGBPalette16& secondPalette;
@@ -73,10 +73,6 @@ class PalettePerHandClockFace: public ClockFace {
   public:
     PalettePerHandClockFace(String description, CRGBPalette16& hPalette, CRGBPalette16& mPalette, CRGBPalette16& sPalette): 
       ClockFace(description), hourPalette(hPalette), minutePalette(mPalette), secondPalette(sPalette) {
-    }
-
-    void incrementIndex() {
-      index = (index + 2) % 255;
     }
   
     CRGB getLedColour(int ledIndex);

@@ -22,61 +22,7 @@ Timezone localTimeZone(BST, GMT);
 
 CRGBArray<NUM_LEDS> leds;
 
-
-DEFINE_GRADIENT_PALETTE( retro2_16_gp ) {
-    0, 188,135,  1,
-  255,  46,  7,  1
-};
-
-DEFINE_GRADIENT_PALETTE( es_pinksplash_08_gp ) {
-    0, 126, 11,255,
-  127, 197,  1, 22,
-  175, 210,157,172,
-  221, 157,  3,112,
-  255, 157,  3,112
-};
-
-DEFINE_GRADIENT_PALETTE( Coral_reef_gp ) {
-    0,  40,199,197,
-   50,  10,152,155,
-   96,   1,111,120,
-   96,  43,127,162,
-  139,  10, 73,111,
-  255,   1, 34, 71
-};
-
-DEFINE_GRADIENT_PALETTE( heatmap_gp ) {
-  0,     0,  0,  0,   //black
-128,   255,  0,  0,   //red
-224,   255,255,  0,   //bright yellow
-255,   255,255,255 }; //full white
-
-DEFINE_GRADIENT_PALETTE( blue_green ) {
-  0,     0,   0, 255, // blue
- 60,     0, 255, 0,    // green
- 255,   255,255,255
-};
-
-CRGBPalette16 hourPalette = es_pinksplash_08_gp;
-CRGBPalette16 minutePalette = retro2_16_gp;
-CRGBPalette16 secondPalette = blue_green;
-
-
-StaticHandClockFace clockFace1("Static hands - RG and no second hand", CRGB::Green, CRGB::Red, CRGB::Black);
-StaticHandClockFace clockFace2("Static hands - RGB", CRGB::Green, CRGB::Red, CRGB::Blue);
-PaletteTickClockFace clockFace3("Palette Tick Hands - RG, Blue to Green sweep", secondPalette, CRGB::Green, CRGB::Red);
-PalettePerHandClockFace clockFace4("A palette per hand - Blue to Green sweep", hourPalette, minutePalette, secondPalette);
-
-const int clocksFaceListLength = 4;
-ClockFace* clocksFaceList[clocksFaceListLength] = {
-  &clockFace1,
-  &clockFace2,
-  &clockFace3,
-  &clockFace4
-};
-
-ClockState clockState(-1, 1, clocksFaceList, clocksFaceListLength);
-
+ClockState clockState(-1, 1);
 
 #define BRIGHTNESS          30
 #define FRAMES_PER_SECOND  120
@@ -154,8 +100,6 @@ void setup() {
 
   Dir dir = SPIFFS.openDir("/sounds");
   while (dir.next()) {
-//    Serial.println(dir.fileName());
-//    clockState.addSoundFile("X");
     chimesListLength++;
   }
 
@@ -165,8 +109,6 @@ void setup() {
   int i = 0;
   while (dir.next()) {
     chimesList[i++] = dir.fileName();
-//    String x = String(i + 1);
-//    chimesList[i++] = x;
   }
 
 //  for (uint8_t i = 0; i < chimesListLength; i++)
@@ -200,14 +142,6 @@ void loop()
     
   }
 
-//  time_t rtcTime = RTC.get();
-//
-//  Serial.print("RTC Epoch time = ");
-//  Serial.println(rtcTime);
-//  
-//  printTime(rtcTime);
-//  displayTimeOnLedRing(rtcTime);
-
   EVERY_N_MILLISECONDS( 100 ) {
     bool isNightMode = checkNightMode();
 //    if(isNightMode) {
@@ -218,16 +152,12 @@ void loop()
     
     time_t utc = now();
     time_t ukTime = localTimeZone.toLocal(utc);
-  
-    // Generate a pattern
-  //  rainbowWithGlitter();
 
 //    printTime(ukTime);
 //    Serial.println(currentClockFace->getDescription());
 
-    ClockFace *currentClockFace = clocksFaceList[clockState.getCurrentClockFaceNumber()];
+    ClockFace *currentClockFace = clockState.getCurrentClockFace();
     displayTimeOnLedRing(ukTime, currentClockFace);
-  //  addGlitter(10);
     
     // send the 'leds' array out to the actual LED strip
     FastLED.show();
@@ -276,26 +206,11 @@ void printTime(time_t epoch) {
   }
 }
 
-//void setupGradientPalette()
-//{
-////    // 'black out' all 16 palette entries...
-////    fill_solid( currentPalette, 16, CRGB::Black);
-////    currentPalette[0] = CRGB::DarkBlue;
-////    currentPalette[1] = CRGB::Green;
-////    currentPalette[2] = CRGB::DarkBlue;
-//    currentPalette[0] = CRGB::DarkBlue;
-//    currentPalette[255] = CRGB::Green;
-//}
-
 void displayTimeOnLedRing(time_t timeNow, ClockFace *clockFace) 
 {
   int second_led = map(second(timeNow), 0, 59, 0, NUM_LEDS - 1);
-//  int minute_led = map(minute(timeNow), 0, 59, 0, NUM_LEDS - 1);
   int minute_led = minute(timeNow);
   int hour_led = (mod8(hour(timeNow), 12) * 5) + (minute_led / 15);
-  
-//  map(mod8(hour(timeNow), 12), 0, 11, 0, NUM_LEDS - 1);
-
 
   // Do a better mapping to the partial number moving further up hour as minute moves
   // hour = 60 / 12 = five dots per hour
@@ -310,8 +225,6 @@ void displayTimeOnLedRing(time_t timeNow, ClockFace *clockFace)
 //  Serial.print(minute_led);
 //  Serial.print(" ");
 //  Serial.println(second_led);
-
-
 
   clockFace->setHandPositions(hour_led, minute_led, second_led);
   

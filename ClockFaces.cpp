@@ -6,10 +6,14 @@ CRGB StaticHandClockFace::getLedColour(int ledIndex) {
     return hourColor;
   }
   else if(ledIndex == minute_led) {
-    return minuteColor;
+    if(index % 15 != 0) {
+      return minuteColor;
+    } else {
+      return highLightLed(minuteColor);
+    }
   }
   else if(ledIndex == second_led) {
-      return secondColor;
+    return secondColor;
   } else {
     return CRGB::Black;
   }
@@ -20,27 +24,33 @@ CRGB PaletteTickClockFace::getLedColour(int ledIndex) {
     return hourColor;
   }
   else if(ledIndex == minute_led) {
-    return minuteColor;
+    if(index % 15 != 0) {
+      return minuteColor;
+    } else {
+      return highLightLed(minuteColor);
+    }
   }
   else if(ledIndex <= second_led) {
-      return ColorFromPalette(currentPalette, ledIndex, 255, LINEARBLEND);
+    return ColorFromPalette(currentPalette, ledIndex, 255, LINEARBLEND);
   } else {
     return CRGB::Black;
   }
 }
 
 CRGB PalettePerHandClockFace::getLedColour(int ledIndex) {
-//  Serial.println(index);
+  CRGB color = CRGB::Black;
   if(ledIndex == hour_led) {
-    return ColorFromPalette(hourPalette, index, 255, LINEARBLEND);
+    color += ColorFromPalette(hourPalette, index, 255, LINEARBLEND);
   }
   else if(ledIndex == minute_led) {
-    return ColorFromPalette(minutePalette, index, 255, LINEARBLEND);
+    color += ColorFromPalette(minutePalette, index, 255, LINEARBLEND);
+    if(index % 15 == 0) {
+      color = highLightLed(color);
+    }
   }
   else if(ledIndex <= second_led) {
-      return ColorFromPalette(secondPalette, ledIndex, 255, LINEARBLEND);
-  } else {
-    return CRGB::Black;
+    color += ColorFromPalette(secondPalette, ledIndex, 255, LINEARBLEND);
   }
+  return color;
 }
 
